@@ -15,16 +15,17 @@ export class SqsService {
 
   async processMessage(message: any) {
     try {
-      const testJsonString = '{"key1": "value1", "key2": 1234}'; // Your test JSON string here
-      const parsedBody = JSON.parse(testJsonString);
-      console.log('Parsed message:', parsedBody);
+     // const testJsonString = '{"key1": "value1", "key2": 1234}'; // Your test JSON string here
+       // console.log('message:', message);
+      const parsedBody = JSON.parse(message.body);
+     // console.log('Parsed message:', parsedBody);
 
       const base64Pdf = 'abc'; // Mock base64 for testing
 
       console.log('base64Pdf:', base64Pdf);
       console.log('Message to send:', parsedBody);
 
-      await this.sendDataViaPost(base64Pdf, parsedBody);
+      await this.sendDataViaPost(base64Pdf, parsedBody.Meta.DataModel);
 
       console.log('Processed message successfully');
     } catch (error) {
@@ -52,7 +53,7 @@ export class SqsService {
     const apiUrl = process.env.FORM_POST_API_URL!;
     const form = new FormData();
     form.append('pdf', base64Pdf);
-    form.append('field1', message.someField || 'default');
+    form.append('field1', message || 'default');
 
     try {
       const response = await axios.post(apiUrl, form, {
