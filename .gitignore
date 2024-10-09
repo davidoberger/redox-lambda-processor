@@ -1,0 +1,49 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Output of 'npm pack'
+*.tgz
+
+# Optional npm cache directory
+.npm
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+
+# Ignore the dist/ folder where your compiled TypeScript files are output
+dist/
+
+# AWS SAM build artifacts
+.aws-sam/
+
+# Ignore local environment files
+.env
+.env.*.local
+
+# Ignore your custom event file used for testing
+event.json
+
+# MacOS files
+.DS_Store
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Debugger related files
+*.log
+debug.log
+
+# Ignore package-lock.json and yarn.lock if not needed in your project
+package-lock.json
+yarn.lock
