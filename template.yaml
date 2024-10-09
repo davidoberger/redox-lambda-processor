@@ -3,7 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: Lambda function to process SQS messages and interact with S3.
 
 Resources:
-  # Define IAM Role for the Lambda function
   LambdaFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -21,7 +20,6 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              # Logging permissions
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
@@ -29,55 +27,50 @@ Resources:
                   - logs:PutLogEvents
                 Resource: 'arn:aws:logs:*:*:*'
 
-              # Permissions to interact with SQS
               - Effect: Allow
                 Action:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: 'arn:aws:sqs:us-east-1:928084763632:Redox-Webhook'  # Update this ARN as needed
+                Resource: 'arn:aws:sqs:us-east-1:928084763632:Redox-Webhook'
 
-              # Permissions to read from S3
               - Effect: Allow
                 Action:
                   - s3:GetObject
-                Resource: 'arn:aws:s3:::redox-s3/*'  # Update bucket name as needed
+                Resource: 'arn:aws:s3:::redox-s3/*'
 
-              # Permissions to read parameters from SSM (if applicable)
               - Effect: Allow
                 Action:
                   - ssm:GetParameter
                 Resource: 'arn:aws:ssm:us-east-1:*:parameter/*'
 
-              # Permissions to read secrets from Secrets Manager (if applicable)
               - Effect: Allow
                 Action:
                   - secretsmanager:GetSecretValue
                 Resource: '*'
 
-  # Define the Lambda function
   SqsProcessingLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: sqs-processing-lambda-function
-      Handler: dist/lambda.handler  # The output file of the compiled TypeScript code
+      Handler: lambda.handler  # Updated handler reference
       Runtime: nodejs18.x
-      CodeUri: ./  # Points to the root of the project where the code exists
+      CodeUri: ./dist  # Points to the compiled output directory
       MemorySize: 512
       Timeout: 30
-      Role: !GetAtt LambdaFunctionRole.Arn  # Use the IAM role created above
+      Role: !GetAtt LambdaFunctionRole.Arn
       Environment:
         Variables:
           APP_AWS_REGION: us-east-1
-          SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/928084763632/Redox-Webhook  # Update queue URL as needed
-          S3_BUCKET_NAME: redox-s3  # Update bucket name as needed
+          SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/928084763632/Redox-Webhook
+          S3_BUCKET_NAME: redox-s3
           FORM_POST_API_URL: https://webhook.site/2cd22442-bf89-4ca4-9e6b-f043b958b1be
       Events:
         SQSTrigger:
           Type: SQS
           Properties:
             BatchSize: 10
-            Queue: arn:aws:sqs:us-east-1:928084763632:Redox-Webhook  # Update SQS ARN as needed
+            Queue: arn:aws:sqs:us-east-1:928084763632:Redox-Webhook
 
 Outputs:
   LambdaFunctionArn:
