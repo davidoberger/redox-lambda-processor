@@ -21,6 +21,8 @@ export class SqsService {
      // console.log('Parsed message:', parsedBody);
 
       const base64Pdf = 'abc'; // Mock base64 for testing
+   
+      // const base64Pdf =  await this.loadBase64PdfFromS3('Medications221');
 
       console.log('base64Pdf:', base64Pdf);
       console.log('Message to send:', parsedBody);
@@ -33,11 +35,18 @@ export class SqsService {
     }
   }
 
-  async loadBase64PdfFromS3(message: any): Promise<string> {
+  async loadBase64PdfFromS3(pdf: string): Promise<string> {
+
+     const couponNumber = pdf || '1'; // Default to 1 if not provided
+    const s3Key = `redox-base64/coupon_${couponNumber}.txt`;
+
     const command = new GetObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME!,
-      Key: 'path-to-your-pdf.pdf',
+      Key: s3Key,
     });
+ 
+
+
 
     try {
       const data = await this.s3Client.send(command);

@@ -1,8 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Lambda function to process SQS messages and interact with S3.
+Description: AWS Lambda functions to process SQS messages and handle S3 file uploads for PDF conversion to Base64.
 
 Resources:
+  # Define IAM Role for the Lambda functions
   LambdaFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -20,6 +21,7 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
+              # Logging permissions
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
@@ -27,52 +29,91 @@ Resources:
                   - logs:PutLogEvents
                 Resource: 'arn:aws:logs:*:*:*'
 
+              # Permissions to interact with SQS
               - Effect: Allow
                 Action:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: 'arn:aws:sqs:us-east-1:928084763632:Redox-Webhook'
+                Resource: 'arn:aws:sqs:us-east-1:928084763632:Redox-Webhook'  # Update this ARN as needed
 
+              # Permissions to read and write to S3 (added redox-s3 bucket)
               - Effect: Allow
                 Action:
                   - s3:GetObject
-                Resource: 'arn:aws:s3:::redox-s3/*'
+                  - s3:PutObject
+                Resource: 
+                  - 'arn:aws:s3:::redox-base64/*'  # Destination bucket for base64
+                  - 'arn:aws:s3:::redox-pdf/*'  # Source bucket for PDFs
+                  - 'arn:aws:s3:::redox-s3/*'  # Added permission for redox-s3 bucket
 
+              # Permissions to read from SSM (if applicable)
               - Effect: Allow
                 Action:
                   - ssm:GetParameter
                 Resource: 'arn:aws:ssm:us-east-1:*:parameter/*'
 
+              # Permissions to read secrets from Secrets Manager (if applicable)
               - Effect: Allow
                 Action:
                   - secretsmanager:GetSecretValue
                 Resource: '*'
 
-  SqsProcessingLambdaFunction:
-    Type: AWS::Serverless::Function
+  # Existing S3 Buckets (marked as external resources)
+  S3SourceBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain  # Prevents deletion of the existing bucket
     Properties:
-      FunctionName: sqs-processing-lambda-function
-      Handler: lambda.handler  # Updated handler reference
+      BucketName: redox-pdf  # The bucket already exists
+
+  S3DestBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain  # Prevents deletion of the existing bucket
+    Properties:
+      BucketName: redox-base64  # The bucket already exists
+
+  # PDF to Base64 Lambda Function (without trigger)
+  PdfToBase64Lambda:
+    Type: AWS::Serverless::Function
+    Properties: 
+      CodeUri: ./dist
+      Handler: pdf-to-base64-lambda.handler
       Runtime: nodejs18.x
-      CodeUri: ./dist  # Points to the compiled output directory
       MemorySize: 512
       Timeout: 30
       Role: !GetAtt LambdaFunctionRole.Arn
       Environment:
         Variables:
-          APP_AWS_REGION: us-east-1
+          S3_SOURCE_BUCKET: !Ref S3SourceBucket
+          S3_DEST_BUCKET: !Ref S3DestBucket
+
+  # SQS Processing Lambda Function (Restored)
+  SqsProcessingLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: lambda.handler
+      Runtime: nodejs18.x
+      MemorySize: 512
+      Timeout: 30
+      Role: !GetAtt LambdaFunctionRole.Arn
+      Environment:
+        Variables:
           SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/928084763632/Redox-Webhook
-          S3_BUCKET_NAME: redox-s3
+          S3_BUCKET_NAME: redox-s3  # The bucket already exists
           FORM_POST_API_URL: https://webhook.site/2cd22442-bf89-4ca4-9e6b-f043b958b1be
       Events:
         SQSTrigger:
           Type: SQS
           Properties:
             BatchSize: 10
-            Queue: arn:aws:sqs:us-east-1:928084763632:Redox-Webhook
+            Queue: arn:aws:sqs:us-east-1:928084763632:Redox-Webhook  # Update SQS ARN as needed
 
 Outputs:
-  LambdaFunctionArn:
-    Description: "ARN of the deployed Lambda function"
+  PdfToBase64LambdaArn:
+    Description: "ARN of the PDF-to-Base64 Lambda function"
+    Value: !GetAtt PdfToBase64Lambda.Arn
+
+  SqsProcessingLambdaFunctionArn:
+    Description: "ARN of the SQS Processing Lambda function"
     Value: !GetAtt SqsProcessingLambdaFunction.Arn

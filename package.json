@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+      "build": "tsc && sam build && cp -r node_modules .aws-sam/build/PdfToBase64Lambda/node_modules && cp -r node_modules .aws-sam/build/SqsProcessingLambdaFunction/node_modules",
+    "deploy": "npm run build && sam deploy --guided",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +16,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.667.0",
+    "aws-sdk": "^2.1691.0",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "form-data": "^4.0.0"
