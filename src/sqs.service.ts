@@ -15,19 +15,20 @@ export class SqsService {
 
   async processMessage(message: any) {
     try {
-     // const testJsonString = '{"key1": "value1", "key2": 1234}'; // Your test JSON string here
-       // console.log('message:', message);
+      // Parse the incoming SQS message
       const parsedBody = JSON.parse(message.body);
-     // console.log('Parsed message:', parsedBody);
 
-      const base64Pdf = 'abc'; // Mock base64 for testing
-   
-      // const base64Pdf =  await this.loadBase64PdfFromS3('Medications221');
+      // Extract PDF name from the parsedBody (adjust this according to the message structure)
+      const pdfName = parsedBody.Meta.Template; // Assuming this is the key you want
 
-      console.log('base64Pdf:', base64Pdf);
+      // Fetch the PDF from S3 and convert it to Base64
+      const base64Pdf = await this.loadBase64PdfFromS3(pdfName);
+
+      console.log('Fetched base64Pdf:', base64Pdf);
       console.log('Message to send:', parsedBody);
 
-      await this.sendDataViaPost(base64Pdf, parsedBody.Meta.DataModel);
+      // Send the Base64-encoded PDF data via POST
+      await this.sendDataViaPost(base64Pdf, pdfName);
 
       console.log('Processed message successfully');
     } catch (error) {
@@ -36,17 +37,13 @@ export class SqsService {
   }
 
   async loadBase64PdfFromS3(pdf: string): Promise<string> {
-
-     const couponNumber = pdf || '1'; // Default to 1 if not provided
-    const s3Key = `redox-base64/coupon_${couponNumber}.txt`;
+    // Construct the S3 object key based on the provided pdf parameter
+    const s3Key = `redox-base64/${pdf}.txt`; // Update this path if needed
 
     const command = new GetObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME!,
+      Bucket: process.env.S3_BUCKET_NAME!, // Ensure the correct bucket name is set in the environment variables
       Key: s3Key,
     });
- 
-
-
 
     try {
       const data = await this.s3Client.send(command);
