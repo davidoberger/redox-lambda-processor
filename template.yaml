@@ -35,9 +35,9 @@ Resources:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: 'arn:aws:sqs:us-east-1:928084763632:Redox-Webhook'  # Update this ARN as needed
+                Resource: 'arn:aws:sqs:us-east-1:928084763632:Redox-Webhook'
 
-              # Permissions to read and write to S3 (added redox-s3 bucket)
+              # Permissions to read and write to S3
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -72,7 +72,7 @@ Resources:
     Properties:
       BucketName: redox-base64  # The bucket already exists
 
-  # PDF to Base64 Lambda Function (without trigger)
+  # PDF to Base64 Lambda Function (without circular dependency)
   PdfToBase64Lambda:
     Type: AWS::Serverless::Function
     Properties: 
@@ -86,6 +86,25 @@ Resources:
         Variables:
           S3_SOURCE_BUCKET: !Ref S3SourceBucket
           S3_DEST_BUCKET: !Ref S3DestBucket
+
+  # Adding S3 Trigger Permission separately to avoid circular dependency
+  PdfToBase64LambdaBucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PdfToBase64Lambda.Arn
+      Principal: s3.amazonaws.com
+      SourceArn: !GetAtt S3SourceBucket.Arn
+
+  # Adding S3 event notification separately
+  S3BucketNotification:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3SourceBucket
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !GetAtt PdfToBase64Lambda.Arn
 
   # SQS Processing Lambda Function (Restored)
   SqsProcessingLambdaFunction:

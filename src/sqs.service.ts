@@ -30,7 +30,7 @@ export class SqsService {
       // Send the Base64-encoded PDF data via POST
       await this.sendDataViaPost(base64Pdf, pdfName);
 
-      console.log('Processed message successfully');
+      console.log('Processed message successfully ');
     } catch (error) {
       console.error('Error processing message:', error);
     }
