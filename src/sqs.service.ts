@@ -2,15 +2,18 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import axios from 'axios';
 import FormData from 'form-data';
 import { config } from 'dotenv';
+import { RedoxService } from './redox.service';  // Import RedoxService
 
 // Load environment variables
 config();
 
 export class SqsService {
   private s3Client: S3Client;
+  private redoxService: RedoxService;  // Declare RedoxService
 
   constructor() {
     this.s3Client = new S3Client({ region: process.env.APP_AWS_REGION });
+    this.redoxService = new RedoxService();  // Initialize RedoxService
   }
 
   async processMessage(message: any) {
@@ -31,13 +34,17 @@ export class SqsService {
       await this.sendDataViaPost(base64Pdf, pdfName);
 
       console.log('Processed message successfully ');
+
+      // Get FHIR data (for testing, you can hardcode patient details, or get it from `parsedBody`)
+      const fhirData = await this.redoxService.getFHIRData('Keva', 'Green', '1995-08-26');  // Use RedoxService to get FHIR data
+      console.log('FHIR Data:', fhirData);
+
     } catch (error) {
       console.error('Error processing message:', error);
     }
   }
 
   async loadBase64PdfFromS3(pdf: string): Promise<string> {
-    // Construct the S3 object key based on the provided pdf parameter
     const s3Key = `redox-base64/${pdf}.txt`; // Update this path if needed
 
     const command = new GetObjectCommand({

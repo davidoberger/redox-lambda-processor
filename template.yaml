@@ -59,20 +59,21 @@ Resources:
                   - secretsmanager:GetSecretValue
                 Resource: '*'
 
-  # Existing S3 Buckets (marked as external resources)
-  S3SourceBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain  # Prevents deletion of the existing bucket
-    Properties:
-      BucketName: redox-pdf  # The bucket already exists
+  # Commenting out S3 bucket-related resources for now
 
-  S3DestBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain  # Prevents deletion of the existing bucket
-    Properties:
-      BucketName: redox-base64  # The bucket already exists
+  # S3SourceBucket:
+  #   Type: AWS::S3::Bucket
+  #   DeletionPolicy: Retain  # Prevents deletion of the existing bucket
+  #   Properties:
+  #     BucketName: redox-pdf  # The bucket already exists
 
-  # PDF to Base64 Lambda Function (without circular dependency)
+  # S3DestBucket:
+  #   Type: AWS::S3::Bucket
+  #   DeletionPolicy: Retain  # Prevents deletion of the existing bucket
+  #   Properties:
+  #     BucketName: redox-base64  # The bucket already exists
+
+  # PDF to Base64 Lambda Function
   PdfToBase64Lambda:
     Type: AWS::Serverless::Function
     Properties: 
@@ -84,29 +85,29 @@ Resources:
       Role: !GetAtt LambdaFunctionRole.Arn
       Environment:
         Variables:
-          S3_SOURCE_BUCKET: !Ref S3SourceBucket
-          S3_DEST_BUCKET: !Ref S3DestBucket
+          S3_SOURCE_BUCKET: "redox-pdf"  # Commenting out the ref to the S3 bucket resource
+          S3_DEST_BUCKET: "redox-base64"  # Commenting out the ref to the S3 bucket resource
 
-  # Adding S3 Trigger Permission separately to avoid circular dependency
-  PdfToBase64LambdaBucketPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt PdfToBase64Lambda.Arn
-      Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3SourceBucket.Arn
+  # Commenting out the S3 trigger permission
+  # PdfToBase64LambdaBucketPermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     FunctionName: !GetAtt PdfToBase64Lambda.Arn
+  #     Principal: s3.amazonaws.com
+  #     SourceArn: !GetAtt S3SourceBucket.Arn
 
-  # Adding S3 event notification separately
-  S3BucketNotification:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref S3SourceBucket
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - Event: s3:ObjectCreated:*
-            Function: !GetAtt PdfToBase64Lambda.Arn
+  # Commenting out S3 event notification
+  # S3BucketNotification:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref S3SourceBucket
+  #     NotificationConfiguration:
+  #       LambdaConfigurations:
+  #         - Event: s3:ObjectCreated:*
+  #           Function: !GetAtt PdfToBase64Lambda.Arn
 
-  # SQS Processing Lambda Function (Restored)
+  # SQS Processing Lambda Function
   SqsProcessingLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
