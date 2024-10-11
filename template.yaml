@@ -78,7 +78,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties: 
       CodeUri: ./dist
-      Handler: pdf-to-base64-lambda.handler
+      Handler: src/pdf-to-base64-lambda.handler
       Runtime: nodejs18.x
       MemorySize: 512
       Timeout: 30
@@ -112,7 +112,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./dist
-      Handler: lambda.handler
+      Handler: src/lambda.handler 
       Runtime: nodejs18.x
       MemorySize: 512
       Timeout: 30
@@ -120,8 +120,40 @@ Resources:
       Environment:
         Variables:
           SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/928084763632/Redox-Webhook
-          S3_BUCKET_NAME: redox-s3  # The bucket already exists
+          S3_BUCKET_NAME: redox-s3
           FORM_POST_API_URL: https://webhook.site/2cd22442-bf89-4ca4-9e6b-f043b958b1be
+          REDOX_KID: "gyNPIdN8e3hIIrwXHR77ZL7w2yKxyTH-eoDCJx1d5UA"
+          REDOX_CLIENT_ID: "fb02b75b-edf3-42cf-9569-5e6cccffb42a"
+          REDOX_PRIVATE_KEY: |
+            -----BEGIN PRIVATE KEY-----
+            MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC3aemYSYxHfADG
+            eK+hZU9yxdxDatEAMnHUnumlqDWVK/edSS5NwRaZWj+eCUWiSvvRrqQDMHMNS9Ys
+            wW2kUW0797HZWfVU7crkjteFuVctS59U8dNDTyaNGzG0yAS2pMfFqjIDFlKvy5cB
+            aCO8WEJT8PwTTTp2ofqWz7g140CsY9zDbIsNXs1VIjfNV6EZNuOuuvLTpbc0lIa9
+            wFDbtI3BksKsZYIv7iR+Csk/ligvBbrg5uuAoeq2Fm6rPaCs7MHrZmQ9QS2z2dVP
+            6dVBjQVsEtjmtMslS0QkAzYGImIPJ9MHZL6eX6UR7WNOBxRLZLid9JD9Fghcurt9
+            5+9DtWIPAgMBAAECggEABShqVEkFM+Ft2Cb+sWg68rxTtGWlmP7SKquJYIo5b4d8
+            ACVVswQSEZ/zGAuktKqtKDlkDV7obWBLlpid77gGfWA61STtfETvprvJnc4XgIOW
+            6Hmgek0YhXFVVYMmdshtgcaGf4W6L41nIrf+AUbuHpQxUo2ibkGh3WncAU/xuqdL
+            7T/FYOJGjhFMyJAkNhdDeEvHCcgrA9aADmjEQQYRSTjX4wrL3ALOrKDuYXdDP4hR
+            4hFNdGRc07VP2mz6GzkKru3VMSLuTlmJtsiMcIrTp33iTpZK0pamCBLk6OGr2RbH
+            bHNTtCvTLq8901SqDz53VzvVoLqWQ2i08WJLbascAQKBgQD/LnKpP27wZpZAVsC6
+            rYbbPtZRObry9cUD+Z3TvnaT6oRToW2dzNbkINpBFzjGPM3TtXCXIFUSF6/45XBu
+            ONX7mjfuulEVr5YOJNWUh9vfjnuZjo7Grw5YIa0yPkVJd0YB9jq2UJkEJlvo177E
+            jY6fgh+LIuFfx1Zw6FS7xx32AQKBgQC4AIedpolKeriTVR/Ad7TRE1lDn9x82Q+y
+            +niEXcmrmM83otWYthASdxScYeuo9FynowhiTxn6FbMOmnyyolLLUlwkQcZcdROR
+            yNZo2yF+cSvDg/V7qHSs2KzVAFEeUlfQVzTYc5+MJxlk/cjh4Zm7h3VWVqJBPVSv
+            antV8KP4DwKBgQC7XWdjTegvK6P26bvpVbBHGwRR74mNC1f1azqvVpHKWc9/eG/8
+            BYNjTZvzXxGYvNyELhzVWjAccLgMkKrUw3aansmix7rxqVMMX49S185hf0TRoxLC
+            X5awr0l0MrS9FI6asii55MP1gBTMCl1QBIBMLkbq6lmA8eROUsikd7dQAQKBgQCQ
+            xAnu5RnbOVaCxFRo70WZwSlX5SxqJbUOUbYEHm4Ozfkqgrien49hl8Lljr0Efs1v
+            LvvnrOh5NB1efflh6ghN44yPEhjooUw2RNc8RDvD6XJPL0Eye0TgwNCp/MfVnV9t
+            kU8IhV+fuxtls64a2Y5EVrzgouShg4lfQd2rrdqzzQKBgQDkpn0IL0DA7laN8Fu3
+            6G7dxZpFdfsrONE5CeVnyMcCk9NvULBotTQl8kjU4tYy2Jh+cLPj0GvO2lkRDUon
+            ImlKOGBUEFe0kO+l7Az6dp1qptyQaT4Qo52MN7nL7CVPfjeygQAdB3brPr/uqsww
+            Ba1LIiHFVP7RMXpa6Xkk3mh4Cg==
+            -----END PRIVATE KEY-----
+            
       Events:
         SQSTrigger:
           Type: SQS
