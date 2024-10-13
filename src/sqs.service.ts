@@ -36,7 +36,7 @@ export class SqsService {
       console.log('Processed message successfully ');
 
       // Get FHIR data (for testing, you can hardcode patient details, or get it from `parsedBody`)
-      const fhirData = await this.redoxService.getFHIRData('Keva', 'Green', '1995-08-26');  // Use RedoxService to get FHIR data
+      const fhirData = await this.redoxService.getFHIRData('Keva', 'Grddeen', '1995-08-26');  // Use RedoxService to get FHIR data
       console.log('FHIR Data:', fhirData);
 
     } catch (error) {

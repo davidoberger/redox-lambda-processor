@@ -85,7 +85,7 @@ Resources:
       Role: !GetAtt LambdaFunctionRole.Arn
       Environment:
         Variables:
-          S3_SOURCE_BUCKET: "redox-pdf"  # Commenting out the ref to the S3 bucket resource
+          S3_SOURCE_BUCKET: "redox-s3"  # Commenting out the ref to the S3 bucket resource
           S3_DEST_BUCKET: "redox-base64"  # Commenting out the ref to the S3 bucket resource
 
   # Commenting out the S3 trigger permission
