@@ -58,6 +58,20 @@ Resources:
                 Action:
                   - secretsmanager:GetSecretValue
                 Resource: '*'
+              # Permissions FOR DynamoDB
+                            # Permissions to access DynamoDB tables
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/PdfCoupons"
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Clinics"
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Rules"
+
+
 
   # Commenting out S3 bucket-related resources for now
 
@@ -87,6 +101,44 @@ Resources:
         Variables:
           S3_SOURCE_BUCKET: "redox-s3"  # Commenting out the ref to the S3 bucket resource
           S3_DEST_BUCKET: "redox-base64"  # Commenting out the ref to the S3 bucket resource
+    # DynamoDB Table for pdf_coupons
+  PdfCouponsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: PdfCoupons
+      AttributeDefinitions:
+        - AttributeName: coupon_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: coupon_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # DynamoDB Table for clinics
+  ClinicsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Clinics
+      AttributeDefinitions:
+        - AttributeName: clinic_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: clinic_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # DynamoDB Table for rules
+  RulesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Rules
+      AttributeDefinitions:
+        - AttributeName: rule_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: rule_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
 
   # Commenting out the S3 trigger permission
   # PdfToBase64LambdaBucketPermission:

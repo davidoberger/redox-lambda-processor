@@ -25,7 +25,7 @@ export class SqsService {
 
       // Extract PDF name from the parsedBody (adjust this according to the message structure)
           // Use the CouponService to get the PDF name
-      const pdfName = this.couponService.getPDF(parsedBody);  // Call getPDF method
+      const pdfName = await this.couponService.getPDF(parsedBody);  // Call getPDF method
       // Fetch the PDF from S3 and convert it to Base64
       const base64Pdf = await this.loadBase64PdfFromS3(pdfName);
 
@@ -41,7 +41,7 @@ export class SqsService {
       const patientData = await this.redoxService.searchByName('Keva', 'Grddeen', '1995-08-26');  // Use RedoxService to get FHIR data
       console.log('FHIR Patient Patient Data:', patientData);
       const medicationList =  await this.redoxService.medicationList('81c2f5eb-f99f-40c4-b504-59483e6148d7'); 
-       console.log('FHIR Medications Data:', medicationList);
+       console.log('FHIR Medications Data:', patientData);
     } catch (error) {
       console.error('Error processing message:', error);
     }
