@@ -3,17 +3,19 @@ import axios from 'axios';
 import FormData from 'form-data';
 import { config } from 'dotenv';
 import { RedoxService } from './redox.service';  // Import RedoxService
-
+import { CouponService } from './coupon.service';  // Import CouponService
 // Load environment variables
 config();
 
 export class SqsService {
   private s3Client: S3Client;
   private redoxService: RedoxService;  // Declare RedoxService
+  couponService: CouponService;
 
   constructor() {
     this.s3Client = new S3Client({ region: process.env.APP_AWS_REGION });
     this.redoxService = new RedoxService();  // Initialize RedoxService
+    this.couponService = new CouponService(); 
   }
 
   async processMessage(message: any) {
@@ -22,8 +24,8 @@ export class SqsService {
       const parsedBody = JSON.parse(message.body);
 
       // Extract PDF name from the parsedBody (adjust this according to the message structure)
-      const pdfName = parsedBody.Meta.Template; // Assuming this is the key you want
-
+          // Use the CouponService to get the PDF name
+      const pdfName = this.couponService.getPDF(parsedBody);  // Call getPDF method
       // Fetch the PDF from S3 and convert it to Base64
       const base64Pdf = await this.loadBase64PdfFromS3(pdfName);
 
@@ -36,9 +38,10 @@ export class SqsService {
       console.log('Processed message successfully ');
 
       // Get FHIR data (for testing, you can hardcode patient details, or get it from `parsedBody`)
-      const fhirData = await this.redoxService.getFHIRData('Keva', 'Grddeen', '1995-08-26');  // Use RedoxService to get FHIR data
-      console.log('FHIR Data:', fhirData);
-
+      const patientData = await this.redoxService.searchByName('Keva', 'Grddeen', '1995-08-26');  // Use RedoxService to get FHIR data
+      console.log('FHIR Patient Patient Data:', patientData);
+      const medicationList =  await this.redoxService.medicationList('81c2f5eb-f99f-40c4-b504-59483e6148d7'); 
+       console.log('FHIR Medications Data:', medicationList);
     } catch (error) {
       console.error('Error processing message:', error);
     }
@@ -65,7 +68,7 @@ export class SqsService {
   async sendDataViaPost(base64Pdf: string, message: any) {
     const apiUrl = process.env.FORM_POST_API_URL!;
     const form = new FormData();
-    form.append('pdf', base64Pdf);
+    form.append('pdf', base64Pdf.slice(0, 1000));
     form.append('field1', message || 'default');
 
     try {

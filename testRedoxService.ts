@@ -13,8 +13,9 @@ async function testRedox() {
     console.log('Access Token:', token);
 
     // Test the FHIR data retrieval (you can use mock data here for testing)
-    const fhirData = await redoxService.getFHIRData('John', 'Doe', '1980-01-01');
-    console.log('FHIR Data:', fhirData);
+    // const fhirData = await redoxService.searchByName('John', 'Doe', '1980-01-01');
+      const fhirData = await redoxService.medicationList('81c2f5eb-f99f-40c4-b504-59483e6148d7');
+   console.log('FHIR Data: meds', JSON.stringify(fhirData, null, 2));
 
   } catch (error) {
     console.error('Error during Redox service test:', error);

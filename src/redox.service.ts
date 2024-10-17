@@ -73,11 +73,11 @@ export class RedoxService {
   }
 
   // Method to get FHIR data using Redox API
-  async getFHIRData(givenName: string, familyName: string, birthDate: string): Promise<any> {
+  async searchByName(givenName: string, familyName: string, birthDate: string): Promise<any> {
     try {
       // 1. Get access token from Redox API
       const token = await this.getAccessToken();
-      
+      console.log ('$$$$$$$$$$$$$$$ token', token);
       // 2. Use access token to call Redox FHIR API to search for patient
       const fhirApiUrl = 'https://api.redoxengine.com/fhir/R4/redox-fhir-sandbox/Development/Patient/_search';
       const response = await axios.post(fhirApiUrl, null, {
@@ -99,4 +99,35 @@ export class RedoxService {
       throw error;
     }
   }
+
+   async medicationList(patientId: string): Promise<any> {
+  try {
+    // 1. Get access token from Redox API
+    const token = await this.getAccessToken();
+    console.log('$$$$$$$$$$$$$$$ token', token);
+
+    // 2. Use access token to call Redox FHIR API to search for patient medications
+    const fhirApiUrl = 'https://api.redoxengine.com/fhir/R4/redox-fhir-sandbox/Development/MedicationAdministration/_search';
+    
+    // 3. Prepare the request body as specified in the documentation
+    const requestBody = {
+      patient: `Patient/${patientId}`
+    };
+
+    // 4. Make the POST request with the correct headers and body
+    const response = await axios.post(fhirApiUrl, requestBody, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json', // Use application/json for the request body
+      },
+    });
+
+    // 5. Return the FHIR data
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching FHIR data:', error);
+    throw error;
+  }
+}
+
 }

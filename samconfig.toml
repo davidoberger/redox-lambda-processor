@@ -7,3 +7,4 @@ region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_NAMED_IAM"
 image_repositories = []
+parameter_overrides = "verifyKey=\"2&pqTtvL9h@skH4\""
