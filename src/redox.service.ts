@@ -129,5 +129,53 @@ export class RedoxService {
     throw error;
   }
 }
+ async postNote(patientId: string, base64Pdf: string): Promise<any> {
+    try {
+      // 1. Get access token from Redox API
+      const token = await this.getAccessToken();
 
+      // 2. Prepare the DocumentReference resource
+      const documentReference = {
+        resourceType: 'DocumentReference',
+        status: 'current',
+        docStatus: 'final',
+        type: {
+          coding: [
+            {
+              system: 'http://loinc.org',
+              code: '11506-3',
+              display: 'Progress note',
+            },
+          ],
+        },
+        subject: {
+          reference: `Patient/${patientId}`,
+        },
+        content: [
+          {
+            attachment: {
+              contentType: 'application/pdf',
+              data: base64Pdf,
+            },
+          },
+        ],
+      };
+
+      // 3. Use access token to call Redox FHIR API to post the note
+      const fhirApiUrl =
+        'https://api.redoxengine.com/fhir/R4/redox-fhir-sandbox/Development/DocumentReference';
+      const response = await axios.post(fhirApiUrl, documentReference, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // 4. Return the response data
+      return response.data;
+    } catch (error) {
+      console.error('Error posting note:', error);
+      throw error;
+    }
+  }
 }

@@ -33,14 +33,14 @@ export class SqsService {
       console.log('Message to send:', parsedBody);
 
       // Send the Base64-encoded PDF data via POST
-      await this.sendDataViaPost(base64Pdf, pdfName);
+      await this.sendDataViaPost(base64Pdf, pdfName, '81c2f5eb-f99f-40c4-b504-59483e6148d7');
 
       console.log('Processed message successfully ');
 
       // Get FHIR data (for testing, you can hardcode patient details, or get it from `parsedBody`)
-      const patientData = await this.redoxService.searchByName('Keva', 'Grddeen', '1995-08-26');  // Use RedoxService to get FHIR data
+      const patientData = await this.redoxService.searchByName('Timothy', 'Bixby', 'e167267c-16c9-4fe3-96ae-9cff5703e90a');  // Use RedoxService to get FHIR data
       console.log('FHIR Patient Patient Data:', patientData);
-      const medicationList =  await this.redoxService.medicationList('81c2f5eb-f99f-40c4-b504-59483e6148d7'); 
+      const medicationList =  await this.redoxService.medicationList('e167267c-16c9-4fe3-96ae-9cff5703e90a'); 
        console.log('FHIR Medications Data:', patientData);
     } catch (error) {
       console.error('Error processing message:', error);
@@ -65,11 +65,12 @@ export class SqsService {
     }
   }
 
-  async sendDataViaPost(base64Pdf: string, message: any) {
+  async sendDataViaPost(base64Pdf: string, message: any, patientId: string) {
     const apiUrl = process.env.FORM_POST_API_URL!;
     const form = new FormData();
+      form.append('drug_code', message || 'default');
     form.append('pdf', base64Pdf.slice(0, 1000));
-    form.append('field1', message || 'default');
+ form.append('patientId',patientId);
 
     try {
       const response = await axios.post(apiUrl, form, {

@@ -24,4 +24,21 @@ console.log('coupon Data:', coupon);
   }
 }
 
-testRedox();
+async function testNote() {
+  try {
+    const redoxService = new RedoxService();
+
+    // Set the patient ID and the base64 string for the PDF
+    const patientId = '0000000001';
+    const base64Pdf = '0000000001_note_pdf'; // Replace with actual Base64 string for the PDF
+
+    // Post the note
+    const response = await redoxService.postNote(patientId, base64Pdf);
+    console.log('Note posted successfully:', response);
+  } catch (error) {
+    console.error('Error posting note:', error);
+  }
+}
+
+ testRedox();
+// testNote();
